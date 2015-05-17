@@ -9,15 +9,13 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.MediaController;
-import android.widget.TextView;
 import android.widget.VideoView;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 
 public class MainActivity extends Activity implements
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener,
-        MediaPlayer.OnPreparedListener, SurfaceHolder.Callback, View.OnClickListener {
+        MediaPlayer.OnPreparedListener, View.OnClickListener {
 
     private static final String TAG = "MyActivity";
     private MediaPlayer mediaPlayer;
@@ -56,39 +54,17 @@ public class MainActivity extends Activity implements
             e.printStackTrace();
         }
         //videoview.requestFocus();
-        videoview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                // close the progress bar and play the video
-                //if we have a position on savedInstanceState, the video playback should start from here
-                videoview.seekTo(savePos);
-                if (savePos == 0) {
-                    videoview.start();
-                } else {
-                    //if we come from a resumed activity, video playback will be paused
-                    videoview.pause();
-                }
-            }
-        });
+        videoview.setOnPreparedListener(this);
     }
 
-    private void playVideo() {
-        try {
-            pause = false;
-            path = editText.getText().toString();
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            // mMediaPlayer.prepareAsync(); Para streaming
-            mediaPlayer.setOnBufferingUpdateListener(this);
-            mediaPlayer.setOnCompletionListener(this);
-            mediaPlayer.setOnPreparedListener(this);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.seekTo(savePos);
-        } catch (Exception e) {
-            Log.d(TAG, "ERROR: " + e.getMessage());
-        }
+    @Override
+    public void onPrepared(MediaPlayer mediaPlayer) {
+        // close the progress bar and play the video
+        videoview.seekTo(savePos);
+        videoview.start();
+
     }
+
 
     @Override
     public void onClick(View view){
@@ -98,7 +74,7 @@ public class MainActivity extends Activity implements
                     if (pause) {
                         mediaPlayer.start();
                     } else {
-                        playVideo();
+                        //playVideo();
                     }
                 }
             case R.id.pause:
@@ -124,69 +100,35 @@ public class MainActivity extends Activity implements
         Log.d(TAG, "onCompletion called");
     }
 
-    public void onPrepared(MediaPlayer mediaplayer) {
-        Log.d(TAG, "onPrepared called");
-        int mVideoWidth = mediaPlayer.getVideoWidth();
-        int mVideoHeight = mediaPlayer.getVideoHeight();
-        if (mVideoWidth != 0 && mVideoHeight != 0) {
-            mediaPlayer.start();
-        }
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG, "onPause");
+        videoview.pause();
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceCreated called");
-        playVideo();
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG, "onStop");
     }
 
-
-    public void surfaceChanged(SurfaceHolder surfaceholder,
-                               int i, int j, int k) {
-        Log.d(TAG, "surfaceChanged called");
-    }
-
-    public void surfaceDestroyed(SurfaceHolder surfaceholder) {
-        Log.d(TAG, "surfaceDestroyed called");
-    }
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    @Override public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null & !pause) {
-            mediaPlayer.pause();
-        }
-    }
-    @Override public void onResume() {
-        super.onResume();
-        if (mediaPlayer != null & !pause) {
-            mediaPlayer.start();
-        }
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle guardarEstado) {
         super.onSaveInstanceState(guardarEstado);
-        if (mediaPlayer != null) {
-            int pos = mediaPlayer.getCurrentPosition();
-            guardarEstado.putString("ruta", path);
-            guardarEstado.putInt("posicion", pos);
-        }
+        Log.d(TAG, "onSaveInstanceState");
+        int pos = videoview.getCurrentPosition();
+        guardarEstado.putString("ruta", path);
+        guardarEstado.putInt("posicion", pos);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle recEstado) {
         super.onRestoreInstanceState(recEstado);
-        if (recEstado != null) {
-            path = recEstado.getString("ruta");
-            savePos = recEstado.getInt("posicion");
-        }
+        Log.d(TAG, "onRestoreInstanceState");
+        path = recEstado.getString("ruta");
+        savePos = recEstado.getInt("posicion");
     }
     
 }
