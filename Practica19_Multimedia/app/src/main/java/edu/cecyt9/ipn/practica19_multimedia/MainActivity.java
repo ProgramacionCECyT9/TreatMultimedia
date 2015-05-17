@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements
             //set the media controller in the VideoView
             videoview.setMediaController(mediaControls);
             //set the uri of the video to be played
-            videoview.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.video));
+            videoview.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pozos));
 
         } catch (Exception e) {
             Log.e("Error", e.getMessage());
